@@ -17,7 +17,7 @@ pool:
       - karbo_pool_db
     containers:
       monero_mysql:
-        build: monero_mysql
+        build: 3rdparty/monero_mysql
         volumes:
           "/var/lib/mysql": monero_mysql
         env:
@@ -27,12 +27,12 @@ pool:
           3306: 85.10.204.239:3306
 
       monero_daemon:
-        build: monero_daemon
+        build: 3rdparty/monero_daemon
         volumes:
           "/root/.bitmonero/": monero_blockchain
 
       monero_wallet:
-        build: monero_wallet
+        build: 3rdparty/monero_wallet
         volumes:
           "/root/wallet": monero_wallet
         env:
@@ -40,7 +40,7 @@ pool:
           #DAEMON_ADDRESS: testnet.node.xmrlab.com:28081
 
       monero_pool:
-        build: monero_pool
+        build: 3rdparty/monero_pool
         volumes:
           "/root/pool_db": monero_pool_db
         env:
@@ -63,7 +63,7 @@ pool:
           9000: 85.10.204.239:9000
 
       monero_pool_frontend:
-        build: monero_pool_frontend
+        build: 3rdparty/monero_pool_frontend
         env:
           POOL_HOSTNAME: 85.10.204.239
           POOL_API_URL: http://85.10.204.239:8001
@@ -76,12 +76,12 @@ pool:
           "/data": ethereum_redis
 
       ethereum_geth:
-        build: ethereum_geth
+        build: 3rdparty/ethereum_geth
         volumes:
           "/root/.ethereum": ethereum_geth
 
       ethereum_pool:
-        build: ethereum_pool
+        build: 3rdparty/ethereum_pool
         env:
           REDIS_HOST: ethereum_redis.main.pool
           REDIS_PORT: 6379
@@ -97,7 +97,7 @@ pool:
           8888: 85.10.204.244:8888
 
       ethereum_pool_frontend:
-        build: ethereum_pool_frontend
+        build: 3rdparty/ethereum_pool_frontend
         env:
           POOL_HOSTNAME: 85.10.204.244
           API_URL: //85.10.204.244:8080/
@@ -111,7 +111,7 @@ pool:
           80: 85.10.204.244:80
 
       karbo_mysql:
-        build: karbo_mysql
+        build: 3rdparty/karbo_mysql
         volumes:
           "/var/lib/mysql": karbo_mysql
         env:
@@ -126,12 +126,12 @@ pool:
           "/data": karbo_redis
 
       karbo_daemon:
-        build: karbo_daemon
+        build: 3rdparty/karbo_daemon
         volumes:
           "/root/.karbowanec/": karbo_blockchain
 
       karbo_wallet:
-        build: karbo_wallet
+        build: 3rdparty/karbo_wallet
         volumes:
           "/root/wallet": karbo_wallet
         env:
@@ -140,7 +140,7 @@ pool:
           #DAEMON_ADDRESS: testnet.node.xmrlab.com:28081
 
       karbo_pool:
-        build: karbo_pool
+        build: 3rdparty/karbo_pool
         env:
           DAEMON_HOST: karbo_daemon.main.pool
           DAEMON_PORT: 32348
@@ -157,7 +157,7 @@ pool:
           9000: 85.10.204.245:9000
 
       karbo_pool_frontend:
-        build: karbo_pool_frontend
+        build: 3rdparty/karbo_pool_frontend
         env:
           API_HOST: 85.10.204.245
           API_PORT: 1117
