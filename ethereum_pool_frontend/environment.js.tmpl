@@ -1,0 +1,38 @@
+/* jshint node: true */
+
+module.exports = function(environment) {
+  var ENV = {
+    modulePrefix: 'open-ethereum-pool',
+    environment: environment,
+    rootURL: '/',
+    locationType: 'hash',
+    EmberENV: {
+      FEATURES: {
+        // Here you can enable experimental features on an ember canary build
+        // e.g. 'with-controller': true
+      }
+    },
+
+    APP: {
+      // API host and port
+      ApiUrl: '${API_URL}',
+
+      // HTTP mining endpoint
+      HttpHost: 'http://${MINING_HTTP_HOST}',
+      HttpPort: ${MINING_HTTP_PORT},
+
+      // Stratum mining endpoint
+      StratumHost: '${MINING_STRATUM_HOST}',
+      StratumPort: ${MINING_STRATUM_PORT},
+
+      // Fee and payout details
+      PoolFee: '${FEE}%',
+      PayoutThreshold: '${THRESHOLD} Ether',
+
+      // For network hashrate (change for your favourite fork)
+      BlockTime: 14.4
+    }
+  };
+
+  return ENV;
+};

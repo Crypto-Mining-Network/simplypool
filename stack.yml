@@ -1,0 +1,166 @@
+pool:
+  main:
+    public_ip: 85.10.204.254
+    volumes:
+      - monero_blockchain
+      - monero_wallet
+      - monero_wallet_testnet
+      - monero_pool_db
+      - monero_mysql
+      - ethereum_redis
+      - ethereum_geth
+      - ethereum_geth_testnet
+      - karbo_blockchain
+      - karbo_wallet
+      - karbo_mysql
+      - karbo_redis
+      - karbo_pool_db
+    containers:
+      monero_mysql:
+        build: monero_mysql
+        volumes:
+          "/var/lib/mysql": monero_mysql
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ vault.mysql.root_password }}"
+          MYSQL_POOL_USER_PASSWORD: "{{ vault.mysql.pool_user_password }}"
+        expose:
+          3306: 85.10.204.239:3306
+
+      monero_daemon:
+        build: monero_daemon
+        volumes:
+          "/root/.bitmonero/": monero_blockchain
+
+      monero_wallet:
+        build: monero_wallet
+        volumes:
+          "/root/wallet": monero_wallet
+        env:
+          DAEMON_ADDRESS: monero_daemon.main.pool:18081
+          #DAEMON_ADDRESS: testnet.node.xmrlab.com:28081
+
+      monero_pool:
+        build: monero_pool
+        volumes:
+          "/root/pool_db": monero_pool_db
+        env:
+          MYSQL_HOST: monero_mysql.main.pool
+          MYSQL_POOL_USER_PASSWORD: "{{ vault.mysql.pool_user_password }}"
+          POOL_HOSTNAME: test
+          #DAEMON_ADDRESS: testnet.node.xmrlab.com
+          #DAEMON_PORT: 28081
+          DAEMON_ADDRESS: monero_daemon.main.pool
+          DAEMON_PORT: 18081
+          WALLET_ADDRESS: monero_wallet.main.pool
+          WALLET_PORT: 8082
+          SHARE_HOST: http://127.0.0.1:8000/leafApi
+          ADMINISTRATOR_PASSWORD: "{{ vault.monero.pool_administrator_password }}"
+        expose:
+          8001: 85.10.204.239:8001
+          7777: 85.10.204.239:7777
+          5555: 85.10.204.239:5555
+          3333: 85.10.204.239:3333
+          9000: 85.10.204.239:9000
+
+      monero_pool_frontend:
+        build: monero_pool_frontend
+        env:
+          POOL_HOSTNAME: 85.10.204.239
+          POOL_API_URL: http://85.10.204.239:8001
+        expose:
+          80: 85.10.204.239:80
+
+      ethereum_redis:
+        run: redis
+        volumes:
+          "/data": ethereum_redis
+
+      ethereum_geth:
+        build: ethereum_geth
+        volumes:
+          "/root/.ethereum": ethereum_geth
+
+      ethereum_pool:
+        build: ethereum_pool
+        env:
+          REDIS_HOST: ethereum_redis.main.pool
+          REDIS_PORT: 6379
+          GETH_HOST: ethereum_geth.main.pool
+          GETH_PORT: 8545
+          WALLET_ADDRESS: "0xecb7423201e56a588973942ba0c2f6c1afe2ffec"
+          FEE_WALLET_ADDRESS: "0x9d18c9e946062d3109d262c1a487bcfb82346a61"
+          #WALLET_ADDRESS: "0xe4740765b08209ae4c2d5b4d793bfa8fc74d3248"
+          #FEE_WALLET_ADDRESS: "0x9147cf0b5661f43e3bf4f54305fe4398b49dd258"
+        expose:
+          8080: 85.10.204.244:8080
+          8008: 85.10.204.244:8008
+          8888: 85.10.204.244:8888
+
+      ethereum_pool_frontend:
+        build: ethereum_pool_frontend
+        env:
+          POOL_HOSTNAME: 85.10.204.244
+          API_URL: //85.10.204.244:8080/
+          MINING_HTTP_HOST: 85.10.204.244
+          MINING_HTTP_PORT: 8888
+          MINING_STRATUM_HOST: 85.10.204.244
+          MINING_STRATUM_PORT: 8008
+          FEE: 1
+          THRESHOLD: 0.05
+        expose:
+          80: 85.10.204.244:80
+
+      karbo_mysql:
+        build: karbo_mysql
+        volumes:
+          "/var/lib/mysql": karbo_mysql
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ vault.mysql.root_password }}"
+          MYSQL_POOL_USER_PASSWORD: "{{ vault.mysql.pool_user_password }}"
+        expose:
+          3306: 85.10.204.245:3306
+
+      karbo_redis:
+        run: redis
+        volumes:
+          "/data": karbo_redis
+
+      karbo_daemon:
+        build: karbo_daemon
+        volumes:
+          "/root/.karbowanec/": karbo_blockchain
+
+      karbo_wallet:
+        build: karbo_wallet
+        volumes:
+          "/root/wallet": karbo_wallet
+        env:
+          DAEMON_HOST: karbo_daemon.main.pool
+          DAEMON_PORT: 32348
+          #DAEMON_ADDRESS: testnet.node.xmrlab.com:28081
+
+      karbo_pool:
+        build: karbo_pool
+        env:
+          DAEMON_HOST: karbo_daemon.main.pool
+          DAEMON_PORT: 32348
+          WALLET_HOST: karbo_wallet.main.pool
+          WALLET_PORT: 8082
+          REDIS_HOST: karbo_redis.main.pool
+          REDIS_PORT: 6379
+          WALLET_ADDRESS: Kbg86BNMEiFQ61gPR6Kg9i1TXAUfaNP2KNvQZovHjhGs3DEC8MehMsGPTTCXi9bKoKH98qLMHrxLC51qJZdxXJMN3c7TsjL
+        expose:
+          1117: 85.10.204.245:1117
+          7777: 85.10.204.245:7777
+          5555: 85.10.204.245:5555
+          3333: 85.10.204.245:3333
+          9000: 85.10.204.245:9000
+
+      karbo_pool_frontend:
+        build: karbo_pool_frontend
+        env:
+          API_HOST: 85.10.204.245
+          API_PORT: 1117
+          POOL_HOSTNAME: 85.10.204.245
+        expose:
+          80: 85.10.204.245:80

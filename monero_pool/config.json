@@ -1,0 +1,14 @@
+{
+  "pool_id": 0,
+  "bind_ip": "0.0.0.0",
+  "hostname": "${POOL_HOSTNAME}",
+  "db_storage_path": "/root/pool_db/",
+  "coin": "xmr",
+  "mysql": {
+    "connectionLimit": 20,
+    "host": "${MYSQL_HOST}",
+    "database": "pool",
+    "user": "pool",
+    "password": "${MYSQL_POOL_USER_PASSWORD}"
+  }
+}

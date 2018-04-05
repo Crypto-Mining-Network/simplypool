@@ -1,0 +1,9 @@
+{
+  "mysql": {
+    "connectionLimit": 20,
+    "socketPath": "/var/run/mysqld/mysqld.sock",
+    "database": "pool",
+    "user": "pool",
+    "password": "${MYSQL_POOL_USER_PASSWORD}"
+  }
+}
