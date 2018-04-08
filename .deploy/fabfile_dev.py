@@ -59,11 +59,6 @@ def deploy(container_to_deploy=None):
                 print("Unneeded container found: %s " % container)
                 docker_manager.remove_container(container)
 
-    openvpn_j2_template = Template(open(".deploy/gateway.ovpn.j2").read())
-    rendered_data = openvpn_j2_template.render(mode=env.mode, instances=["127.0.0.1"])
-    if rendered_data:
-        open("ovpn_dev.ovpn", "w").write(rendered_data)
-
 
 def logs(service, tail=100):
     docker_manager.logs(service, tail=tail)

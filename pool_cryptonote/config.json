@@ -1,0 +1,67 @@
+{
+  "coin": "${COIN}",
+  "sigDivisor": "${SIG_DIVISOR}",
+
+  "logging": {
+    "console": {
+      "level": "info",
+      "colors": true
+    }
+  },
+
+  "poolServer": {
+    "poolAddress": "${WALLET_ADDRESS}",
+    "blockRefreshInterval": 1000,
+    "minerTimeout": 900,
+    "ports": [
+      {
+        "port": 3333,
+        "difficulty": 100,
+        "desc": "Low end hardware"
+      },
+      {
+        "port": 5555,
+        "difficulty": 2000,
+        "desc": "Mid range hardware"
+      },
+      {
+        "port": 7777,
+        "difficulty": 10000,
+        "desc": "High end hardware"
+      },
+      {
+        "port": 8888,
+        "difficulty": 50000,
+        "desc": "Hidden port",
+        "hidden": true
+      }
+    ],
+    "varDiff": {
+      "minDiff": 100,
+      "maxDiff": 200000,
+      "targetTime": 100,
+      "retargetTime": 30,
+      "variancePercent": 30,
+      "maxJump": 100
+    },
+    "fixedDiff": {
+      "enabled": true,
+      "addressSeparator": "."
+    }
+  },
+
+  "blockValidator": {
+    "interval": 60,
+    "depth": "${BLOCK_VALIDATOR_DEPTH}"
+  },
+
+  "daemon": {
+    "host": "${DAEMON_HOST}",
+    "port": ${DAEMON_PORT}
+  },
+
+  "pool_engine": {
+    "host": "${POOL_ENGINE_HOST}",
+    "port": ${POOL_ENGINE_PORT}
+  }
+}

@@ -48,16 +48,6 @@ def prod():
 def deploy(*args, **kwargs):
     execute_task("deploy", *args, **kwargs)
 
-    openvpn_j2_template = Template(open(".deploy/gateway.ovpn.j2").read())
-    rendered_data = None
-    if env.mode == "prod":
-        rendered_data = openvpn_j2_template.render(mode=env.mode, instances=env.do_hosts.keys())
-    elif env.mode == "dev":
-        rendered_data = openvpn_j2_template.render(mode=env.mode, instances=["127.0.0.1"])
-
-    if rendered_data:
-        open("ovpn_%s.ovpn" % env.mode, "w").write(rendered_data)
-
 
 @task
 def logs(*args, **kwargs):
