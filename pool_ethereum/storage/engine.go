@@ -19,6 +19,7 @@ type EngineClient struct {
 	url string
 	coin string
 	sigDivisor int64
+	powStorage map[uint64](map[string]bool)
 }
 
 type BlockData struct {
@@ -44,7 +45,7 @@ type BlockData struct {
 }
 
 func NewEngineClient(cfg *Config, coin string, sigDivisor int64) *EngineClient {
-	return &EngineClient{url: cfg.Url, coin: coin, sigDivisor: sigDivisor}
+	return &EngineClient{url: cfg.Url, coin: coin, sigDivisor: sigDivisor, powStorage: map[uint64](map[string]bool){}}
 }
 
 func (r *EngineClient) WriteNodeState(id string, height uint64, diff *big.Int) error {
@@ -66,10 +67,30 @@ func (r *EngineClient) WriteNodeState(id string, height uint64, diff *big.Int) e
 
 
 func (r *EngineClient) checkPoWExist(height uint64, params []string) (bool, error) {
-	// Sweep PoW backlog for previous blocks, we have 3 templates back in RAM
-	//r.client.ZRemRangeByScore(r.formatKey("pow"), "-inf", fmt.Sprint("(", height-8))
-	//val, err := r.client.ZAdd(r.formatKey("pow"), redis.Z{Score: float64(height), Member: strings.Join(params, ":")}).Result()
-	//return val == 0, err
+	keys := make([]uint64, len(r.powStorage))
+
+	i := 0
+	for k := range r.powStorage {
+		keys[i] = k
+		i++
+	}
+
+	for i := range keys {
+		key := keys[i]
+		if height - key > 8 {
+			delete(r.powStorage, key)
+		}
+	}
+
+	if x, ok := r.powStorage[height]; ok {
+		if x[strings.Join(params, ":")] {
+			return true, nil
+		}
+	} else {
+		r.powStorage[height] = map[string]bool{}
+	}
+
+	r.powStorage[height][strings.Join(params, ":")] = true
 	return false, nil
 }
 
