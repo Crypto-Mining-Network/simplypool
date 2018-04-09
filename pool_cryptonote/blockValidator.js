@@ -59,7 +59,8 @@ function runInterval() {
                 utils.post(config.pool_engine.host, config.pool_engine.port, "/validate_block", {
                     block_id: block.id,
                     is_valid: block.valid,
-                    reward: block.reward / parseInt(config.sigDivisor)
+                    reward: block.reward / parseInt(config.sigDivisor),
+                    height: block.height
                 }, function() {
                     log('info', logSystem, 'Validated block with block_id %s', [block.id]);
                 }, function(err) {

@@ -22,7 +22,7 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('block_id', sa.Integer, nullable=False),
         sa.Column('wallet', sa.String(128), nullable=False),
-        sa.Column('shares', sa.Integer, nullable=False, default=0)
+        sa.Column('shares', sa.BIGINT, nullable=False, default=0)
     )
     op.create_unique_constraint('uq_round_shares', 'round_shares', ['block_id', 'wallet'],)
 

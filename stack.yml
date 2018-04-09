@@ -79,6 +79,24 @@ pool:
         expose:
           7777: 85.10.204.245:7779
 
+      pool_ethereum:
+        build: pool_ethereum
+        env:
+          COIN: eth
+          SIG_DIVISOR: 1000000000000000000
+          TESTNET: "true"
+          VALIDATOR_DEPTH: 120
+          PROXY_DIFFICULTY: 2000000000
+          GETH_URL: http://ethereum_geth_testnet.main.pool:8545
+          ENGINE_URL: http://pool_engine.main.pool
+        expose:
+          8008: 8009
+
+      ethereum_geth_testnet:
+        build: 3rdparty/ethereum_geth
+        volumes:
+          "/root/.ethereum": ethereum_geth_testnet
+
       monero_mysql:
         build: 3rdparty/monero_mysql
         volumes:

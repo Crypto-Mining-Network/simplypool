@@ -28,7 +28,6 @@ var instanceId = crypto.randomBytes(4);
 var validBlockTemplates = [];
 var currentBlockTemplate;
 var connectedMiners = {};
-var perIPStats = {};
 var addressBase58Prefix = cnUtil.address_decode(new Buffer(config.poolServer.poolAddress));
 
 
@@ -251,7 +250,8 @@ function recordShareData(miner, job, shareDiff, blockCandidate, hashHex, shareTy
     utils.post(config.pool_engine.host, config.pool_engine.port, "/submit_share", {
         coin: config.coin,
         wallet: miner.login,
-        count: job.score
+        count: job.score,
+        worker: miner.pass ? miner.pass.split(':')[0] : "default"
     }, function() {
         log('info', logSystem, 'Accepted %s share at difficulty %d/%d from %s@%s', [shareType, job.difficulty, shareDiff, miner.login, miner.ip]);
         if (blockCandidate) {
@@ -431,7 +431,6 @@ function handleMinerMethod(method, params, ip, portData, sendReply, pushMessage)
         if (!noncePattern.test(params.nonce)) {
                 var minerText = miner ? (' ' + miner.login + '@' + miner.ip) : '';
                 log('warn', logSystem, 'Malformed nonce: ' + JSON.stringify(params) + ' from ' + minerText);
-                perIPStats[miner.ip] = { validShares: 0, invalidShares: 999999 };
                 sendReply('Duplicate share');
                 return;
             }
@@ -439,7 +438,6 @@ function handleMinerMethod(method, params, ip, portData, sendReply, pushMessage)
             if (job.submissions.indexOf(params.nonce) !== -1) {
                 var minerText = miner ? (' ' + miner.login + '@' + miner.ip) : '';
                 log('warn', logSystem, 'Duplicate share: ' + JSON.stringify(params) + ' from ' + minerText);
-                perIPStats[miner.ip] = { validShares: 0, invalidShares: 999999 };
                 sendReply('Duplicate share');
                 return;
             }

@@ -22,7 +22,7 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('coin', sa.String(16), nullable=False),
         sa.Column('height', sa.Integer, nullable=True),
-        sa.Column('hash', sa.String(64), nullable=True),
+        sa.Column('hash', sa.String(512), nullable=True),
         sa.Column('reward', sa.Float, nullable=True),
         sa.Column('mined_at', sa.TIMESTAMP, nullable=True),
         sa.Column('is_valid', sa.Boolean, nullable=True),

@@ -44,11 +44,11 @@ def main():
         for block in pg.execute("SELECT * FROM blocks WHERE is_valid is TRUE AND is_unlocked is FALSE ORDER BY id"):
             print("Block to unlock: %s" % (block["id"],))
             pg.execute("DELETE FROM rewards WHERE block_id = %s", (block["id"],))
-            total_shares = list(pg.execute("SELECT SUM(shares) FROM round_shares WHERE block_id = %s", (block["id"],)))[0][0]
+            total_shares = float(list(pg.execute("SELECT SUM(shares) FROM round_shares WHERE block_id = %s", (block["id"],)))[0][0])
             for round_share in pg.execute("SELECT * FROM round_shares WHERE block_id = %s", (block["id"],)):
                 pg.execute(
                     "INSERT INTO rewards (coin, block_id, wallet, reward) VALUES (%s, %s, %s, %s)",
-                    (block["coin"], block["id"], round_share["wallet"], (round_share["shares"] / total_shares) * block["reward"])
+                    (block["coin"], block["id"], round_share["wallet"], (float(round_share["shares"]) / total_shares) * block["reward"])
                 )
             pg.execute("UPDATE blocks SET is_unlocked = TRUE WHERE id = %s", (block["id"],))
             print("Successfully unlocked block %s" % (block["id"],))

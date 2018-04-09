@@ -6,6 +6,8 @@ from datetime import datetime
 from aiohttp import web
 from aiopg.sa import create_engine
 
+from utils import align_backward
+
 
 def get_config():
     keys = (
@@ -70,11 +72,65 @@ async def blocks_to_validate(request):
     ])
 
 
+async def update_hash_history(conn, granularity, coin, wallet, worker, hashes):
+    at = align_backward(datetime.utcnow(), granularity)
+
+    await conn.execute(
+        """UPDATE hash_history 
+           SET hashes = hashes + %s 
+           WHERE 
+             at = %s AND 
+            granularity = %s AND 
+             coin = %s AND 
+             wallet = %s AND
+             worker IS NULL""",
+           (hashes, at, granularity, coin, wallet)
+        )
+    await conn.execute(
+        """INSERT INTO hash_history (at, granularity, coin, wallet, hashes)
+           SELECT %s, %s, %s, %s, %s
+           WHERE NOT EXISTS (SELECT 1 FROM hash_history WHERE 
+             at = %s AND 
+             granularity = %s AND 
+             coin = %s AND 
+             wallet = %s AND
+             worker IS NULL
+           )
+        """,
+        (at, granularity, coin, wallet, hashes, at, granularity, coin, wallet)
+    )
+    await conn.execute(
+        """UPDATE hash_history 
+           SET hashes = hashes + %s 
+           WHERE 
+             at = %s AND 
+            granularity = %s AND 
+             coin = %s AND 
+             wallet = %s AND
+             worker = %s""",
+           (hashes, at, granularity, coin, wallet, worker)
+        )
+    await conn.execute(
+        """INSERT INTO hash_history (at, granularity, coin, wallet, worker, hashes)
+           SELECT %s, %s, %s, %s, %s, %s
+           WHERE NOT EXISTS (SELECT 1 FROM hash_history WHERE 
+             at = %s AND 
+             granularity = %s AND 
+             coin = %s AND 
+             wallet = %s AND
+             worker = %s
+           )
+        """,
+        (at, granularity, coin, wallet, worker, hashes, at, granularity, coin, wallet, worker)
+    )
+
+
 async def submit_share(request):
     args = await request.post()
     coin = args["coin"]
     count = args["count"]
     wallet = args["wallet"]
+    worker = args["worker"]
 
     if coin not in block_by_coin:
         block_by_coin[coin] = await get_current_block(coin)
@@ -88,10 +144,12 @@ async def submit_share(request):
         await conn.execute(
             """INSERT INTO round_shares (block_id, wallet, shares) 
                SELECT %s, %s, %s 
-               WHERE NOT EXISTS (SELECT 1 FROM round_shares WHERE block_id = %s AND wallet = %s)
-            """,
+               WHERE NOT EXISTS (SELECT 1 FROM round_shares WHERE block_id = %s AND wallet = %s)""",
             (block_id, wallet, count, block_id, wallet)
         )
+        await update_hash_history(conn, "5T", coin, wallet, worker, count)
+        await update_hash_history(conn, "1H", coin, wallet, worker, count)
+        await update_hash_history(conn, "6H", coin, wallet, worker, count)
 
     return web.json_response({})
 
@@ -115,9 +173,10 @@ async def validate_block(request):
     block_id = int(args["block_id"])
     is_valid = args["is_valid"] == "1"
     reward = float(args["reward"])
+    height = int(args["height"])
 
     async with engine.acquire() as conn:
-        await conn.execute("UPDATE blocks SET is_valid = %s, reward = %s WHERE id = %s", (is_valid, reward, block_id))
+        await conn.execute("UPDATE blocks SET is_valid = %s, reward = %s, height = %s WHERE id = %s", (is_valid, reward, height, block_id))
 
     return web.json_response({})
 

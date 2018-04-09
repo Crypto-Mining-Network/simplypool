@@ -1,0 +1,49 @@
+{
+	"threads": 2,
+	"coin": "${COIN}",
+	"name": "main",
+	"sigDivisor": ${SIG_DIVISOR},
+
+	"proxy": {
+		"enabled": true,
+		"listen": "0.0.0.0:8888",
+		"limitHeadersSize": 1024,
+		"limitBodySize": 256,
+		"behindReverseProxy": false,
+		"blockRefreshInterval": "120ms",
+		"stateUpdateInterval": "3s",
+		"hashrateExpiration": "3h",
+		"difficulty": ${PROXY_DIFFICULTY},
+
+		"healthCheck": true,
+		"maxFails": 100,
+
+		"stratum": {
+			"enabled": true,
+			"listen": "0.0.0.0:8008",
+			"timeout": "120s",
+			"maxConn": 8192
+		}
+	},
+
+	"validator": {
+		"depth": ${VALIDATOR_DEPTH},
+		"interval": "10m",
+		"daemon": "${GETH_URL}",
+		"timeout": "10s",
+        "testnet": ${TESTNET}
+	},
+
+	"upstreamCheckInterval": "5s",
+	"upstream": [
+		{
+			"name": "main",
+			"url": "${GETH_URL}",
+			"timeout": "10s"
+		}
+	],
+
+	"engine": {
+		"url": "${ENGINE_URL}"
+	}
+}
