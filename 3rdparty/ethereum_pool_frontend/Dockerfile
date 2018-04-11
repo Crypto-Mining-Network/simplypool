@@ -18,7 +18,7 @@ ADD main.sh /main.sh
 RUN chmod +x /main.sh
 ADD nginx.conf /nginx.conf
 ADD environment.js.tmpl /environment.js.tmpl
-ADD index.html /index.html
+#ADD index.html /index.html
 
 CMD ["/main.sh"]
 

@@ -55,6 +55,25 @@ setInterval(function() {
 }, config.poolServer.varDiff.retargetTime * 1000);
 
 
+setInterval(function() {
+    apiInterfaces.rpcDaemon('getlastblockheader', {}, function(error, reply){
+        if (error){
+            log('error', logSystem, 'Error getting daemon data %j', [error]);
+            return;
+        }
+        var blockHeader = reply.block_header;
+
+        utils.post(config.pool_engine.host, config.pool_engine.port, "/submit_node_info", {
+            coin: config.coin,
+            height: blockHeader.height,
+            difficulty: blockHeader.difficulty
+        }, function() {}, function(e) {
+            log('info', logSystem, 'Error submitting node info: %s', [e]);
+        });
+    });
+}, 1000);
+
+
 function BlockTemplate(template) {
     this.blob = template.blocktemplate_blob;
     this.difficulty = template.difficulty;

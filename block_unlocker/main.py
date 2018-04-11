@@ -8,6 +8,7 @@ import sqlalchemy as sa
 def get_config():
     keys = (
         ("INTERVAL", "60", False),
+        ("FEE", "1", False),
         ("POSTGRES_HOST", "postgres", False),
         ("POSTGRES_PORT", "5432", False),
         ("POSTGRES_USER", "pool", False),
@@ -39,12 +40,28 @@ def main():
         )
     )
 
+    wallet_by_coin = {}
+    if config["FEE_WALLET_XMR"]:
+        wallet_by_coin["xmr"] = config["FEE_WALLET_XMR"]
+    if config["FEE_WALLET_KRB"]:
+        wallet_by_coin["krb"] = config["FEE_WALLET_KRB"]
+    if config["FEE_WALLET_ETH"]:
+        wallet_by_coin["eth"] = config["FEE_WALLET_ETH"]
+
     while True:
         print("Iteration started")
         for block in pg.execute("SELECT * FROM blocks WHERE is_valid is TRUE AND is_unlocked is FALSE ORDER BY id"):
             print("Block to unlock: %s" % (block["id"],))
             pg.execute("DELETE FROM rewards WHERE block_id = %s", (block["id"],))
             total_shares = float(list(pg.execute("SELECT SUM(shares) FROM round_shares WHERE block_id = %s", (block["id"],)))[0][0])
+            reward = block["reward"]
+            fee = (reward / 100) * int(config["FEE"])
+            reward -= fee
+            if block["coin"] in wallet_by_coin:
+                pg.execute(
+                    "INSERT INTO rewards (coin, block_id, wallet, reward) VALUES (%s, %s, %s, %s)",
+                    (block["coin"], block["id"], wallet_by_coin[block["coin"]], fee)
+                )
             for round_share in pg.execute("SELECT * FROM round_shares WHERE block_id = %s", (block["id"],)):
                 pg.execute(
                     "INSERT INTO rewards (coin, block_id, wallet, reward) VALUES (%s, %s, %s, %s)",

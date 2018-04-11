@@ -43,7 +43,7 @@ func NewBlockValidator(cfg *ValidatorConfig, backend *storage.EngineClient) *Blo
 		log.Fatalf("Block maturity depth can't be < %v, your depth is %v", minDepth*2, cfg.Depth)
 	}
 	if cfg.Testnet {
-		byzantiumHardForkHeight = 0;
+		byzantiumHardForkHeight = 1700000;
 	}
 	u := &BlockValidator{config: cfg, backend: backend}
 	u.rpc = rpc.NewRPCClient("BlockValidator", cfg.Daemon, cfg.Timeout)

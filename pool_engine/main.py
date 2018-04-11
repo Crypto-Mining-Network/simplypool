@@ -181,11 +181,32 @@ async def validate_block(request):
     return web.json_response({})
 
 
+async def submit_node_info(request):
+    args = await request.post()
+    coin = args["coin"]
+    height = int(args["height"])
+    difficulty = int(args["difficulty"])
+    polled_at = datetime.utcnow()
+
+    async with engine.acquire() as conn:
+        await conn.execute(
+            "UPDATE nodes SET height = %s, difficulty = %s, polled_at = %s WHERE coin = %s",
+            (height, difficulty, polled_at, coin)
+        )
+        await conn.execute(
+            """INSERT INTO nodes (coin, height, difficulty, polled_at) 
+               SELECT %s, %s, %s, %s
+               WHERE NOT EXISTS (SELECT 1 FROM nodes WHERE coin = %s)""",
+            (coin, height, difficulty, polled_at, coin)
+        )
+
+
 def setup_routes(app):
     app.router.add_get("/blocks_to_validate", blocks_to_validate)
     app.router.add_post("/submit_block", submit_block)
     app.router.add_post("/submit_share", submit_share)
     app.router.add_post("/validate_block", validate_block)
+    app.router.add_post("/submit_node_info", submit_node_info)
 
 
 def main():

@@ -49,19 +49,18 @@ func NewEngineClient(cfg *Config, coin string, sigDivisor int64) *EngineClient {
 }
 
 func (r *EngineClient) WriteNodeState(id string, height uint64, diff *big.Int) error {
-	//tx := r.client.Multi()
-	//defer tx.Close()
-	//
-	//now := util.MakeTimestamp() / 1000
-	//
-	//_, err := tx.Exec(func() error {
-	//	tx.HSet(r.formatKey("nodes"), join(id, "name"), id)
-	//	tx.HSet(r.formatKey("nodes"), join(id, "height"), strconv.FormatUint(height, 10))
-	//	tx.HSet(r.formatKey("nodes"), join(id, "difficulty"), diff.String())
-	//	tx.HSet(r.formatKey("nodes"), join(id, "lastBeat"), strconv.FormatInt(now, 10))
-	//	return nil
-	//})
-	//return err
+	resp, err := http.PostForm(
+		fmt.Sprintf("%s/submit_node_info", r.url),
+		url.Values{"coin": {r.coin}, "height": {fmt.Sprintf("%v", height)}, "difficulty": {fmt.Sprintf("%v", diff)}})
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

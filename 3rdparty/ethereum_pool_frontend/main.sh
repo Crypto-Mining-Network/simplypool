@@ -5,5 +5,5 @@ perl -p -i -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < /nginx.con
 perl -p -i -e 's/\$\{([^}]+)\}/defined $ENV{$1} ? $ENV{$1} : $&/eg' < /environment.js.tmpl > config/environment.js &&
 ./build.sh &&
 cp -R dist/* /srv &&
-cp /index.html /srv &&
+#cp /index.html /srv &&
 nginx -c /etc/nginx/nginx.conf
