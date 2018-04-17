@@ -75,54 +75,108 @@ async def blocks_to_validate(request):
 async def update_hash_history(conn, granularity, coin, wallet, worker, hashes):
     at = align_backward(datetime.utcnow(), granularity)
 
-    await conn.execute(
-        """UPDATE hash_history 
-           SET hashes = hashes + %s 
-           WHERE 
-             at = %s AND 
-            granularity = %s AND 
-             coin = %s AND 
-             wallet = %s AND
-             worker IS NULL""",
-           (hashes, at, granularity, coin, wallet)
+    async with conn.begin() as tr:
+        await conn.execute(
+            """UPDATE workers_history 
+               SET valid_hashes = valid_hashes + %s 
+               WHERE 
+                 at = %s AND 
+                 granularity = %s AND 
+                 coin = %s AND 
+                 wallet = %s AND
+                 worker IS NULL""",
+            (hashes, at, granularity, coin, wallet)
         )
-    await conn.execute(
-        """INSERT INTO hash_history (at, granularity, coin, wallet, hashes)
-           SELECT %s, %s, %s, %s, %s
-           WHERE NOT EXISTS (SELECT 1 FROM hash_history WHERE 
-             at = %s AND 
-             granularity = %s AND 
-             coin = %s AND 
-             wallet = %s AND
-             worker IS NULL
-           )
-        """,
-        (at, granularity, coin, wallet, hashes, at, granularity, coin, wallet)
-    )
-    await conn.execute(
-        """UPDATE hash_history 
-           SET hashes = hashes + %s 
-           WHERE 
-             at = %s AND 
-            granularity = %s AND 
-             coin = %s AND 
-             wallet = %s AND
-             worker = %s""",
-           (hashes, at, granularity, coin, wallet, worker)
+        await conn.execute(
+            """INSERT INTO workers_history (at, granularity, coin, wallet, valid_hashes, invalid_hashes)
+               SELECT %s, %s, %s, %s, %s, %s
+               WHERE NOT EXISTS (SELECT 1 FROM workers_history WHERE 
+               at = %s AND 
+               granularity = %s AND 
+               coin = %s AND 
+               wallet = %s AND
+               worker IS NULL
+               )
+            """,
+            (at, granularity, coin, wallet, hashes, 0, at, granularity, coin, wallet)
         )
-    await conn.execute(
-        """INSERT INTO hash_history (at, granularity, coin, wallet, worker, hashes)
-           SELECT %s, %s, %s, %s, %s, %s
-           WHERE NOT EXISTS (SELECT 1 FROM hash_history WHERE 
-             at = %s AND 
-             granularity = %s AND 
-             coin = %s AND 
-             wallet = %s AND
-             worker = %s
-           )
-        """,
-        (at, granularity, coin, wallet, worker, hashes, at, granularity, coin, wallet, worker)
-    )
+        await conn.execute(
+            """UPDATE workers_history 
+               SET valid_hashes = valid_hashes + %s 
+               WHERE 
+                  at = %s AND 
+                  granularity = %s AND 
+                  coin = %s AND 
+                  wallet = %s AND
+                  worker = %s""",
+            (hashes, at, granularity, coin, wallet, worker)
+        )
+        await conn.execute(
+            """INSERT INTO workers_history (at, granularity, coin, wallet, worker, valid_hashes, invalid_hashes)
+               SELECT %s, %s, %s, %s, %s, %s, %s
+               WHERE NOT EXISTS (SELECT 1 FROM workers_history WHERE 
+                  at = %s AND 
+                  granularity = %s AND 
+                  coin = %s AND 
+                  wallet = %s AND
+                  worker = %s
+                )
+            """,
+            (at, granularity, coin, wallet, worker, hashes, 0, at, granularity, coin, wallet, worker)
+        )
+
+
+async def update_worker(conn, coin, wallet, worker, hashes):
+    now = datetime.utcnow()
+    async with conn.begin() as tr:
+        await conn.execute(
+            """UPDATE workers
+              SET 
+                last_share = %s, 
+                downtime = downtime + (CASE WHEN extract(epoch from (%s - last_share)) > 900 THEN extract(epoch from (%s - last_share)) ELSE 0 END),
+                uptime = (CASE WHEN extract(epoch from (%s - last_share)) < 900 THEN uptime + extract(epoch from (%s - last_share)) ELSE 0 END),
+                valid_hashes = valid_hashes + %s
+              WHERE
+                coin = %s AND
+                wallet = %s AND 
+                worker IS NULL""",
+            (now, now, now, now, now, hashes, coin, wallet)
+        )
+        await conn.execute(
+            """INSERT INTO workers (coin, wallet, last_share, first_share, downtime, uptime, valid_hashes, invalid_hashes)
+               SELECT %s, %s, %s, %s, %s, %s, %s, %s
+               WHERE NOT EXISTS (SELECT 1 FROM workers WHERE 
+                 coin = %s AND 
+                 wallet = %s AND
+                 worker IS NULL
+               )
+            """,
+            (coin, wallet, now, now, 0, 0, hashes, 0, coin, wallet)
+        )
+        await conn.execute(
+            """UPDATE workers
+               SET 
+                 last_share = %s, 
+                 downtime = downtime + (CASE WHEN extract(epoch from (%s - last_share)) > 900 THEN extract(epoch from (%s - last_share)) ELSE 0 END),
+                 uptime = (CASE WHEN extract(epoch from (%s - last_share)) < 900 THEN uptime + extract(epoch from (%s - last_share)) ELSE 0 END),
+                 valid_hashes = valid_hashes + %s
+               WHERE
+                 coin = %s AND
+                 wallet = %s AND 
+                 worker = %s""",
+            (now, now, now, now, now, hashes, coin, wallet, worker)
+        )
+        await conn.execute(
+            """INSERT INTO workers (coin, wallet, worker, last_share, first_share, downtime, uptime, valid_hashes, invalid_hashes)
+               SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s
+               WHERE NOT EXISTS (SELECT 1 FROM workers WHERE 
+                 coin = %s AND 
+                 wallet = %s AND
+                 worker = %s
+               )
+            """,
+            (coin, wallet, worker, now, now, 0, 0, hashes, 0, coin, wallet, worker)
+        )
 
 
 async def submit_share(request):
@@ -130,26 +184,30 @@ async def submit_share(request):
     coin = args["coin"]
     count = args["count"]
     wallet = args["wallet"]
-    worker = args["worker"]
+    worker = args.get("worker", "default")
+
+    print("Share submitted: %s, %s, %s, %s" % (coin, count, wallet, worker))
 
     if coin not in block_by_coin:
         block_by_coin[coin] = await get_current_block(coin)
     block_id = block_by_coin[coin]
 
     async with engine.acquire() as conn:
-        await conn.execute(
-            "UPDATE round_shares SET shares = shares + %s WHERE block_id = %s AND wallet = %s",
-            (count, block_id, wallet)
-        )
-        await conn.execute(
-            """INSERT INTO round_shares (block_id, wallet, shares) 
-               SELECT %s, %s, %s 
-               WHERE NOT EXISTS (SELECT 1 FROM round_shares WHERE block_id = %s AND wallet = %s)""",
-            (block_id, wallet, count, block_id, wallet)
-        )
+        async with conn.begin() as tr:
+            await conn.execute(
+                "UPDATE round_shares SET shares = shares + %s WHERE block_id = %s AND wallet = %s",
+                (count, block_id, wallet)
+            )
+            await conn.execute(
+                """INSERT INTO round_shares (block_id, wallet, shares) 
+                   SELECT %s, %s, %s 
+                   WHERE NOT EXISTS (SELECT 1 FROM round_shares WHERE block_id = %s AND wallet = %s)""",
+                (block_id, wallet, count, block_id, wallet)
+            )
         await update_hash_history(conn, "5T", coin, wallet, worker, count)
         await update_hash_history(conn, "1H", coin, wallet, worker, count)
         await update_hash_history(conn, "6H", coin, wallet, worker, count)
+        await update_worker(conn, coin, wallet, worker, count)
 
     return web.json_response({})
 
@@ -199,6 +257,8 @@ async def submit_node_info(request):
                WHERE NOT EXISTS (SELECT 1 FROM nodes WHERE coin = %s)""",
             (coin, height, difficulty, polled_at, coin)
         )
+
+    return web.json_response({})
 
 
 def setup_routes(app):

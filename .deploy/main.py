@@ -27,20 +27,22 @@ def initialize():
     env.update(parse_stack_vars("stack_vars.yml"))
     env.stack = Stack("stack.yml")
     env.run = lambda cmd, show=False: sudo(cmd, quiet=not show)
-    env.mode = "prod"
 
+env.mode = "prod"
 initialize()
 
 
 @task
 def dev():
     env.mode = "dev"
+    initialize()
     env.run = lambda cmd, show=False: local(cmd, capture=not show)
 
 
 @task
 def prod():
     env.mode = "prod"
+    initialize()
     env.run = lambda cmd, show=False: sudo(cmd, quiet=not show)
 
 

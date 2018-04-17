@@ -1,0 +1,4 @@
+aiohttp==2.3.9
+aiopg==0.13.2
+SQLAlchemy==1.2.3
+aiohttp_cors==0.6.0

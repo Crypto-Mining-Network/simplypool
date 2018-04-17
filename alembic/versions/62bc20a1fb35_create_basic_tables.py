@@ -45,16 +45,31 @@ def upgrade():
     )
     op.create_unique_constraint('uq_round_shares', 'round_shares', ['block_id', 'wallet'], )
     op.create_table(
-        'hash_history',
+        'workers_history',
         sa.Column('id', sa.Integer, primary_key=True),
         sa.Column('at', sa.TIMESTAMP, nullable=False),
         sa.Column('granularity', sa.String(8), nullable=False),
-        sa.Column('coin', sa.String(16), nullable=False),
-        sa.Column('wallet', sa.String(128), nullable=False),
+        sa.Column('coin', sa.String(16), nullable=True),
+        sa.Column('wallet', sa.String(128), nullable=True),
         sa.Column('worker', sa.String(32), nullable=True),
-        sa.Column('hashes', sa.BIGINT, nullable=False)
+        sa.Column('valid_hashes', sa.BIGINT, nullable=False),
+        sa.Column('invalid_hashes', sa.BIGINT, nullable=False)
     )
-    op.create_unique_constraint('uq_hash_history', 'hash_history', ['at', 'granularity', 'coin', 'wallet', 'worker'], )
+    op.create_unique_constraint('uq_workers_history', 'workers_history', ['at', 'granularity', 'coin', 'wallet', 'worker'], )
+    op.create_table(
+        'workers',
+        sa.Column('id', sa.Integer, primary_key=True),
+        sa.Column('coin', sa.String(16), nullable=True),
+        sa.Column('wallet', sa.String(128), nullable=True),
+        sa.Column('worker', sa.String(32), nullable=True),
+        sa.Column('last_share', sa.TIMESTAMP, nullable=True),
+        sa.Column('first_share', sa.TIMESTAMP, nullable=False),
+        sa.Column('downtime', sa.Integer, nullable=False),
+        sa.Column('uptime', sa.Integer, nullable=False),
+        sa.Column('valid_hashes', sa.Integer, nullable=False),
+        sa.Column('invalid_hashes', sa.Integer, nullable=False)
+    )
+    op.create_unique_constraint('uq_workers', 'workers', ['coin', 'wallet', 'worker'], )
     op.create_table(
         'nodes',
         sa.Column('coin', sa.String(16), primary_key=True),
@@ -69,6 +84,8 @@ def downgrade():
     op.drop_table('rewards')
     op.drop_constraint('uq_round_shares', 'round_shares')
     op.drop_table('round_shares')
-    op.drop_constraint('uq_hash_history', 'hash_history')
-    op.drop_table('hash_history')
+    op.drop_constraint('uq_workers_history', 'workers_history')
+    op.drop_table('workers_history')
+    op.drop_constraint('uq_workers', 'workers')
+    op.drop_table('workers')
     op.drop_table('nodes')

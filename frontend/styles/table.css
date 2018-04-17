@@ -1,0 +1,44 @@
+.table {
+    border-spacing: 0;
+    width: 100%;
+    border: 2px solid #36b5d4;
+    border-radius: 3px 3px 0 0;
+    table-layout: fixed;
+}
+
+.table > thead > tr > td {
+    height: 48px;
+    background: #4bbcd9;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    box-sizing: border-box;
+    padding: 10px;
+}
+
+.table > tbody > tr > td {
+    height: 46px;
+    line-height: 26px;
+    font-size: 16px;
+    box-sizing: border-box;
+    padding: 10px;
+    color: #646e70;
+}
+
+.table > tbody > tr:nth-child(odd) > td {
+    background: #ecf9fc;
+}
+
+.table > tbody > tr:nth-child(even) > td {
+    background: #dbe7ea;
+}
+
+.table > tbody > tr > td a,
+.table > tbody > tr > td a:hover,
+.table > tbody > tr > td a:active,
+.table > tbody > tr > td a:visited
+{
+    text-decoration: underline;
+    cursor: pointer;
+    color: #328ba1;
+}

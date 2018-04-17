@@ -1,7 +1,7 @@
 FROM ubuntu:16.04
 
 RUN apt-get update && \
-    apt-get install -y uuid-runtime curl git perl nginx libjpeg62 libjpeg62-dev libpng-dev
+    apt-get install -y uuid-runtime curl git perl nginx
 RUN cd /tmp && \
     curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh && \
     bash ./nodesource_setup.sh && \
@@ -11,12 +11,13 @@ RUN npm install --global webpack@3.10.0
 COPY ./package.json /
 RUN cd / && npm install
 
-RUN mkdir /usr/src/frontend
-RUN rm -R /srv && \
-    ln -s /usr/src/frontend/static /srv
+ADD . /usr/src/frontend
+RUN cd /usr/src/frontend && \
+    webpack && \
+    cp -R static/* /srv
 
 ADD nginx.conf /nginx.conf
-ADD main_dev.sh /main.sh
+ADD main.sh /main.sh
 RUN chmod +x /main.sh
 ADD config.js /config.js
 

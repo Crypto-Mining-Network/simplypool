@@ -1,0 +1,205 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+ul, li {
+    list-style: none;
+}
+
+body {
+    font: 14px/18px Arial, sans-serif;
+    color: #231f20;
+}
+
+#application {
+    background: #d5f4fd;
+}
+
+.app__header1 {
+    height: 55px;
+    background: #32b7d6;
+    border-top: 1px solid #8cebff;
+    border-bottom: 1px solid #349ab3;
+    overflow: hidden;
+}
+
+.app__header2 {
+    height: 90px;
+    border-top: 1px solid #b2e7f5;
+    border-bottom: 1px solid #cad4d6;
+    overflow: hidden;
+}
+
+.app__wrapper {
+    margin: 0 auto;
+    max-width: 1230px;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 940px) {
+    .app__wrapper {
+        margin: 0;
+        width: 940px;
+    }
+}
+
+.app__logo {
+    display: inline-block;
+    vertical-align: middle;
+    background: url(./logo.png);
+    height: 89px;
+    width: 286px;
+    margin-right: 200px;
+}
+
+.app__header1_link, .app__header1_link:visited, .app__header1_link:hover, .app__header1_link:active {
+    display: inline-block;
+    color: #f9ffff;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 55px;
+    text-decoration: none;
+    margin-right: 30px;
+}
+
+.app__language_box {
+    display: inline-block;
+    float: right;
+}
+
+.app__language_link {
+    margin-left: 5px;
+    margin-right: 0 !important;
+    color: #a7f6ff !important;
+    font-size: 16px;
+}
+
+.app__language_link:after {
+    display: inline-block;
+    content: "⌄";
+    color: #fff !important;
+    font-size: 26px;
+    vertical-align: middle;
+    margin-top: -10px;
+}
+
+.app__language_span {
+    margin-right: 0 !important;
+}
+
+.app__header2_link, .app__header2_link:visited, .app__header2_link:hover, .app__header2_link:active {
+    display: inline-block;
+    color: #646e6f;
+    font-size: 16px;
+    line-height: 90px;
+    vertical-align: middle;
+    margin-right: 40px;
+    text-decoration: none;
+}
+
+.app__content {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.app__footer {
+    box-sizing: border-box;
+    height: 120px;
+    background: #5e93a1;
+    padding-top: 10px;
+}
+
+.app__footer_text {
+    color: #c6f1ff;
+    text-align: center;
+}
+
+.app__footer_link {
+    color: #e7ffff;
+}
+
+.app__login_box {
+    position: relative;
+    display: inline-block;
+    width: 305px;
+    height: 60px;
+    float: right;
+    margin-top: 16px;
+    border: 1px solid #cad4d6;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.app__login_input, .app__login_input:focus {
+    box-sizing: border-box;
+    width: 140px;
+    height: 30px;
+    border: none;
+    border-radius: 2px;
+    box-shadow: inset 0 0 10px #d4d4d4;
+    text-align: center;
+    padding: 0 5px;
+    font-size: 16px;
+    outline: 0;
+}
+
+.app__login_email {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+}
+
+.app__login_password {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+}
+
+.app__login_link, .app__login_link:visited, .app__login_link:hover, .app__login_link:active {
+    font-size: 13px;
+    color: #4ba7be;
+    text-decoration: underline;
+}
+
+
+.app__login_registration_link {
+    position: absolute;
+    bottom: 5px;
+    left: 40px;
+}
+
+.app__login_forget_link {
+    position: absolute;
+    bottom: 5px;
+    right: 25px;
+}
+
+@media (max-width: 1180px) {
+    .app__logo {
+        margin-right: 20px;
+    }
+
+    .app__header2_link, .app__header2_link:visited, .app__header2_link:hover, .app__header2_link:active {
+        margin-right: 20px !important;
+    }
+}
+
+.app__main {
+    min-height: 100%;
+    margin-bottom: -120px;
+}
+
+.app__push {
+    height: 120px;
+}

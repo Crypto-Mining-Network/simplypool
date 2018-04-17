@@ -1,0 +1,57 @@
+.miners__table_no_td {
+    width: 30px;
+}
+
+.miners__table_wallet_td {
+    word-wrap: break-word;
+}
+
+.miners__table_uptime_td, .miners__table_last_share_td {
+    width: 120px;
+}
+
+.miners__coin {
+    margin-bottom: 20px;
+}
+
+.miners__coin_header {
+    display: inline-block;
+    height: 30px;
+    line-height: 30px;
+    font-weight: bold;
+    font-size: 18px;
+    color: #646e70;
+    margin-right: 20px;
+    vertical-align: middle;
+    margin-bottom: 10px;
+}
+
+.miners__coin_track_box {
+    display: inline-block;
+    margin-bottom: 10px;
+    vertical-align: middle;
+}
+
+.miners__coin_track_input, .miners__coin_track_input:focus {
+    display: inline-block;
+    width: 700px;
+    height: 30px;
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    padding: 0 5px;
+    font-size: 16px;
+    outline: 0;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.miners__coin_track_button {
+    display: inline-block;
+    height: 30px;
+    background: #2cb0d0;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    border: 0;
+    vertical-align: middle;
+}

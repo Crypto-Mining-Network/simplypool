@@ -44,7 +44,9 @@ pool:
         env:
           INTERVAL: 60
           FEE: 1
-          FEE_WALLET_ETH: 0x6465813a69507626c8d01b1d44da22b3c72d3e65
+          FEE_WALLET_ETH: "0x6465813a69507626c8d01b1d44da22b3c72d3e65"
+          FEE_WALLET_XMR: 4JUdGzvrMFDWrUUwY3toJATSeNwjn54LkCnKBPRzDuhzi5vSepHfUckJNxRL2gjkNrSqtCoRUrEDAgRwsQvVCjZbS22Te3GPYxy5v1EPE6
+          FEE_WALLET_KRB: Kbg86BNMEiFQ61gPR6Kg9i1TXAUfaNP2KNvQZovHjhGs3DEC8MehMsGPTTCXi9bKoKH98qLMHrxLC51qJZdxXJMN3c7TsjL
           POSTGRES_HOST: postgres.main.pool
           POSTGRES_PORT: 5432
           POSTGRES_DB: pool
@@ -58,7 +60,7 @@ pool:
           COIN: krb
           BLOCK_VALIDATOR_DEPTH: 10
           SIG_DIVISOR: 1000000000000
-          WALLET_ADDRESS: Kc2y6kdnJR8LnrE2wSKGgV8DxbNVreQPQcKfGp1efKUbKAaZLNjCvs6cF2BhewZEQGZUjDTB7QgHVbJoYTE89eh2EY6zuSz
+          WALLET_ADDRESS: Kbg86BNMEiFQ61gPR6Kg9i1TXAUfaNP2KNvQZovHjhGs3DEC8MehMsGPTTCXi9bKoKH98qLMHrxLC51qJZdxXJMN3c7TsjL
           DAEMON_HOST: karbo_daemon.main.pool
           DAEMON_PORT: 32348
           POOL_ENGINE_HOST: pool_engine.main.pool
@@ -93,6 +95,36 @@ pool:
           ENGINE_URL: http://pool_engine.main.pool
         expose:
           8008: 8009
+
+      api:
+        build: api
+        env:
+          POSTGRES_HOST: postgres.main.pool
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: pool
+          POSTGRES_USER: pool
+          POSTGRES_PWD: "{{ vault.postgres_users.pool }}"
+        expose:
+          80: 88.198.45.81:8000
+
+      frontend:
+        build: frontend
+        {% if mode == "prod" %}
+        docker_file: Dockerfile.prod
+        {% endif %}
+        env:
+          HOSTNAME: 88.198.45.81
+          API_URL: http://88.198.45.81:8000
+        {% if mode == "dev" %}
+        volumes:
+          "/usr/src/frontend": "{{ project_dir }}/frontend"
+        {% endif %}
+        expose:
+          {% if mode == "prod" %}
+          80: 88.198.45.81:80
+          {% else %}
+          80: 8080
+          {% endif %}
 
       monero_mysql:
         build: 3rdparty/monero_mysql

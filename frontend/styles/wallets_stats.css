@@ -1,0 +1,129 @@
+.wallets_stats__stat_block {
+    display: inline-block;
+    height: 130px;
+    border: 2px solid #2eb2d3;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-right: 25px;
+    margin-bottom: 10px;
+}
+
+.wallets_stats__stat_block:last-child {
+    margin-right: 0;
+}
+
+.wallets_stats__stat_block_wrapper {
+    float: left;
+}
+
+.wallets_stats__stat_block_wrapper .wallets_stats__stat_block_value {
+    border-left: 2px solid #2eb2d3;
+}
+
+.wallets_stats__stat_block_wrapper:first-child .wallets_stats__stat_block_value {
+    border: none;
+}
+
+.wallets_stats__stat_block_wrapper .wallets_stats__stat_block_header {
+    border-left: 2px solid #1e92af;
+}
+
+.wallets_stats__stat_block_wrapper:first-child .wallets_stats__stat_block_header {
+    border: none;
+}
+
+.wallets_stats__stat_block_header {
+    height: 55px;
+    background: #2eb2d3;
+    line-height: 55px;
+    text-align: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.wallets_stats__stat_block_value {
+    //display: table;
+    width: 100%;
+    height: 77px;
+    background: #d7f5fd;
+    font-weight: bold;
+    font-size: 18px;
+    color: #646e70;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wallets_stats__stat_block_value span {
+    display: block;
+    vertical-align: middle;
+    text-align: center;
+    /*page-break-after: always; !* CSS 2.1 syntax *!*/
+    /*break-after: always; !* New syntax *!*/
+}
+
+.wallets_stats__stat_block_value span.small {
+    color: #86969a;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.wallets_stats__profit_block .wallets_stats__stat_block_wrapper {
+    width: 266px;
+}
+
+.wallets_stats__workers_block .wallets_stats__stat_block_wrapper {
+    width: 156px;
+}
+
+.wallets_stats__due_block .wallets_stats__stat_block_wrapper {
+    width: 266px;
+}
+
+.wallets_stats__income_wrapper, .wallets_stats__spends_wrapper {
+    width: 205px;
+}
+
+.wallets_stats__table {
+    width: 100%;
+    border-spacing: 0;
+    border: 2px solid #2eb2d3;
+    border-radius: 3px;
+    table-layout: fixed;
+}
+
+.wallets_stats__table thead tr {
+    height: 55px;
+    background: #2eb2d3;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.wallets_stats__table thead td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.wallets_stats__table tbody tr {
+    height: 32px;
+    background: #d7f5fd;
+    color: #646e70;
+    font-size: 14px;
+    line-height: 32px;
+}
+
+.wallets_stats__table tbody td {
+    text-align: center;
+}
+
+.wallets_stats__table thead td:first-child {
+    width: 100px;
+}
+
+.wallets_stats__table tbody td:first-child {
+    color: #646e70;
+    font-weight: bold;
+}

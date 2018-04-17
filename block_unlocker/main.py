@@ -9,6 +9,9 @@ def get_config():
     keys = (
         ("INTERVAL", "60", False),
         ("FEE", "1", False),
+        ("FEE_WALLET_XMR", None, False),
+        ("FEE_WALLET_KRB", None, False),
+        ("FEE_WALLET_ETH", None, False),
         ("POSTGRES_HOST", "postgres", False),
         ("POSTGRES_PORT", "5432", False),
         ("POSTGRES_USER", "pool", False),

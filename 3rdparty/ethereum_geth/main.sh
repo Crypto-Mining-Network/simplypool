@@ -2,15 +2,15 @@
 set -o noglob
 
 if [ "$TESTNET" = "true" ]; then
-  UNLOCK_WALLET="$(ls /root/.ethereum/keystore/ | sed "s/.*--//")"
-else
   UNLOCK_WALLET="$(ls /root/.ethereum/testnet/keystore/ | sed "s/.*--//")"
+else
+  UNLOCK_WALLET="$(ls /root/.ethereum/keystore/ | sed "s/.*--//")"
 fi
 
 ARGS="--rpc --fast --cache 2048 --maxpeers 128 --rpcaddr 0.0.0.0 --rpcvhosts * --nat extip:$EXT_IP"
 
 if ! [ -z "$UNLOCK_WALLET" ]; then
-  ARGS="$ARGS --unlock $UNLOCK_WALLET"
+  ARGS="$ARGS --unlock $UNLOCK_WALLET --password /root/.ethereum/password"
 fi
 
 if [ "$TESTNET" = "true" ]; then
