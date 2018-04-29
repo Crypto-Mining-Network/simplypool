@@ -93,7 +93,7 @@ func (r *EngineClient) checkPoWExist(height uint64, params []string) (bool, erro
 	return false, nil
 }
 
-func (r *EngineClient) WriteShare(login, id string, params []string, diff int64, height uint64, window time.Duration) (bool, error) {
+func (r *EngineClient) WriteShare(login, id, email string, params []string, diff int64, height uint64, window time.Duration) (bool, error) {
 	exist, err := r.checkPoWExist(height, params)
 	if err != nil {
 		return false, err
@@ -105,7 +105,7 @@ func (r *EngineClient) WriteShare(login, id string, params []string, diff int64,
 
 	resp, err := http.PostForm(
 		fmt.Sprintf("%s/submit_share", r.url),
-		url.Values{"coin": {r.coin}, "wallet": {login}, "count": {fmt.Sprintf("%v", diff)}, "worker": {id}})
+		url.Values{"coin": {r.coin}, "wallet": {login}, "count": {fmt.Sprintf("%v", diff)}, "worker": {id}, "email": {email}})
 	if err != nil {
 		return false, err
 	}
@@ -118,8 +118,8 @@ func (r *EngineClient) WriteShare(login, id string, params []string, diff int64,
 	return false, nil
 }
 
-func (r *EngineClient) WriteBlock(login, id string, params []string, diff, roundDiff int64, height uint64, window time.Duration) (bool, error) {
-	exist, err := r.WriteShare(login, id, params, diff, height, window)
+func (r *EngineClient) WriteBlock(login, id, email string, params []string, diff, roundDiff int64, height uint64, window time.Duration) (bool, error) {
+	exist, err := r.WriteShare(login, id, email, params, diff, height, window)
 
 	if err != nil {
 		return false, err

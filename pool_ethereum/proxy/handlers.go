@@ -21,10 +21,17 @@ func (s *ProxyServer) handleLoginRPC(cs *Session, params []string, id string) (b
 	}
 
 	login := strings.ToLower(params[0])
+	email := ""
+	login_bits := strings.Split(login, "/")
+	if len(login_bits) == 2 {
+		email = login_bits[1]
+		login = login_bits[0]
+	}
 	if !util.IsValidHexAddress(login) {
 		return false, &ErrorReply{Code: -1, Message: "Invalid login"}
 	}
 	cs.login = login
+	cs.email = email
 	s.registerSession(cs)
 	log.Printf("Stratum miner connected %v@%v", login, cs.ip)
 	return true, nil
@@ -47,10 +54,10 @@ func (s *ProxyServer) handleTCPSubmitRPC(cs *Session, id string, params []string
 	if !ok {
 		return false, &ErrorReply{Code: 25, Message: "Not subscribed"}
 	}
-	return s.handleSubmitRPC(cs, cs.login, id, params)
+	return s.handleSubmitRPC(cs, cs.login, id, cs.email, params)
 }
 
-func (s *ProxyServer) handleSubmitRPC(cs *Session, login, id string, params []string) (bool, *ErrorReply) {
+func (s *ProxyServer) handleSubmitRPC(cs *Session, login, id, email string, params []string) (bool, *ErrorReply) {
 	if !workerPattern.MatchString(id) {
 		id = "0"
 	}
@@ -64,7 +71,7 @@ func (s *ProxyServer) handleSubmitRPC(cs *Session, login, id string, params []st
 		return false, &ErrorReply{Code: -1, Message: "Malformed PoW result"}
 	}
 	t := s.currentBlockTemplate()
-	exist, validShare := s.processShare(login, id, cs.ip, t, params)
+	exist, validShare := s.processShare(login, id, email, cs.ip, t, params)
 
 	if exist {
 		log.Printf("Duplicate share from %s@%s %v", login, cs.ip, params)

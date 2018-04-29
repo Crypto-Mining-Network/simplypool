@@ -68,7 +68,7 @@ def main():
             for round_share in pg.execute("SELECT * FROM round_shares WHERE block_id = %s", (block["id"],)):
                 pg.execute(
                     "INSERT INTO rewards (coin, block_id, wallet, reward) VALUES (%s, %s, %s, %s)",
-                    (block["coin"], block["id"], round_share["wallet"], (float(round_share["shares"]) / total_shares) * block["reward"])
+                    (block["coin"], block["id"], round_share["wallet"], (float(round_share["shares"]) / total_shares) * reward)
                 )
             pg.execute("UPDATE blocks SET is_unlocked = TRUE WHERE id = %s", (block["id"],))
             print("Successfully unlocked block %s" % (block["id"],))

@@ -37,10 +37,10 @@ body {
     height: 90px;
     border-top: 1px solid #b2e7f5;
     border-bottom: 1px solid #cad4d6;
-    overflow: hidden;
 }
 
 .app__wrapper {
+    position: relative;
     margin: 0 auto;
     max-width: 1230px;
     padding: 0 20px;
@@ -109,8 +109,8 @@ body {
 }
 
 .app__content {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .app__footer {
@@ -129,7 +129,7 @@ body {
     color: #e7ffff;
 }
 
-.app__login_box {
+.app__login_box, .app__authenticated_box {
     position: relative;
     display: inline-block;
     width: 305px;
@@ -139,6 +139,52 @@ body {
     border: 1px solid #cad4d6;
     border-radius: 5px;
     background: #fff;
+}
+
+.app__authenticated_box {
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+.app__authenticated_settings_link,
+.app__authenticated_settings_link:active,
+.app__authenticated_settings_link:hover,
+.app__authenticated_settings_link:visited {
+    position: absolute;
+    left: 15px;
+    bottom: 5px;
+    font-size: 12px;
+    color: #2eb2d3;
+    cursor: pointer;
+}
+
+.app__authenticated_logout_link,
+.app__authenticated_logout_link:active,
+.app__authenticated_logout_link:hover,
+.app__authenticated_logout_link:visited{
+    position: absolute;
+    right: 15px;
+    bottom: 5px;
+    font-size: 12px;
+    color: #d09393;
+}
+
+.app__authenticated_caption {
+    float: left;
+    color: #a8adae;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.app__authenticated_login {
+    float: right;
+    color: #646e70;
+    font-size: 14px;
 }
 
 .app__login_input, .app__login_input:focus {
@@ -152,6 +198,10 @@ body {
     padding: 0 5px;
     font-size: 16px;
     outline: 0;
+}
+
+.app__login_input.error {
+    border: 1px solid #ff3300;
 }
 
 .app__login_email {
@@ -202,4 +252,87 @@ body {
 
 .app__push {
     height: 120px;
+}
+
+.app__login_submit {
+    display: none;
+}
+
+.app__miner_settings {
+    position: absolute;
+    top: 85px;
+    right: 20px;
+    width: 465px;
+    z-index: 1;
+    border: 1px solid #2493af;
+    border-radius: 5px;
+    background: #f1fafc;
+    padding: 10px 25px;
+    box-sizing: border-box;
+}
+
+.app__miner_settings_row {
+    margin-bottom: 10px;
+}
+
+.app__miner_settings_close_link {
+    color: #646e70;
+    margin-left: 406px;
+    display: block;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.app__miner_settings label {
+    color: #646e70;
+    font-size: 16px;
+    margin-right: 10px;
+    width: 145px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.app__miner_settings_input, .app__miner_settings_input:focus {
+    width: 258px;
+    height: 30px;
+    border: 1px solid #d0d6d8;
+    border-radius: 3px;
+    padding: 0 5px;
+    font-size: 16px;
+    outline: 0;
+    vertical-align: middle;
+}
+
+.app__miner_settings_button {
+    margin-left: 325px;
+    display: inline-block;
+    height: 30px;
+    background: #2cb0d0;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    border: 0;
+    vertical-align: middle;
+}
+
+.app__miner_settings_error {
+    color: #ff3300;
+    font-size: 12px;
+}
+
+.app__miner_settings_input_error {
+    color: #ff3300;
+    font-size: 12px;
+    margin-left: 155px;
+}
+
+.app__miner_settings_input.error {
+    border: 1px solid #ff3300;
+}
+
+.app__miner_settings a,
+.app__miner_settings a:visited,
+.app__miner_settings a:hover,
+.app__miner_settings a:active {
+    color: #4ba7be;
 }

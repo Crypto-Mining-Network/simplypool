@@ -42,6 +42,7 @@ type Session struct {
 	sync.Mutex
 	conn  *net.TCPConn
 	login string
+	email string
 }
 
 func NewProxy(cfg *Config, backend *storage.EngineClient) *ProxyServer {
@@ -210,6 +211,12 @@ func (cs *Session) handleMessage(s *ProxyServer, r *http.Request, req *JSONRpcRe
 
 	vars := mux.Vars(r)
 	login := strings.ToLower(vars["login"])
+	email := ""
+	login_bits := strings.Split(login, "/")
+	if len(login_bits) == 2 {
+		email = login_bits[1]
+		login = login_bits[0]
+	}
 
 	if !util.IsValidHexAddress(login) {
 		errReply := &ErrorReply{Code: -1, Message: "Invalid login"}
@@ -234,7 +241,7 @@ func (cs *Session) handleMessage(s *ProxyServer, r *http.Request, req *JSONRpcRe
 				log.Printf("Unable to parse params from %v", cs.ip)
 				break
 			}
-			reply, errReply := s.handleSubmitRPC(cs, login, vars["id"], params)
+			reply, errReply := s.handleSubmitRPC(cs, login, vars["id"], email, params)
 			if errReply != nil {
 				cs.sendError(req.Id, errReply)
 				break

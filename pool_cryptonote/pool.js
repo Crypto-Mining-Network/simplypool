@@ -270,7 +270,8 @@ function recordShareData(miner, job, shareDiff, blockCandidate, hashHex, shareTy
         coin: config.coin,
         wallet: miner.login,
         count: job.score,
-        worker: miner.pass ? miner.pass.split(':')[0] : "default"
+        worker: miner.pass ? miner.pass.split(':')[0] : "default",
+        email: miner.pass && miner.pass.split(':').length == 2 ? miner.pass.split(':')[1] : ""
     }, function() {
         log('info', logSystem, 'Accepted %s share at difficulty %d/%d from %s@%s', [shareType, job.difficulty, shareDiff, miner.login, miner.ip]);
         if (blockCandidate) {

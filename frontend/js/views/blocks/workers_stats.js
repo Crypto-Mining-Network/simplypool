@@ -85,7 +85,7 @@ export class WorkersStatsBlockView extends React.Component {
                                         <tr>
                                             <td>{ worker.valid_hashes } (100%)</td>
                                             <td>{ worker.invalid_hashes } (0%)</td>
-                                            <td>{ Math.floor(worker.uptime_percent) }%</td>
+                                            <td>{ worker.uptime_percent.toFixed(2) }%</td>
                                         </tr>
                                         <tr>
                                             <td colspan="3">&nbsp;</td>
@@ -101,14 +101,6 @@ export class WorkersStatsBlockView extends React.Component {
                 <div className="worker_stats__pagination">
                     <div className="workers_stats__pagination_per_page_box">
                         <span>Воркеров на странице:</span>
-                        <a
-                            className={"workers_stats__pagination_per_page_switch" + (this.props.workersLimit == 10 ? " active" : "") }
-                            onClick={ (e) => { this.props.actionQueue.put(new ChangeWorkersLimitAction(10)) } }
-                        >10</a>
-                        <a
-                            className={"workers_stats__pagination_per_page_switch" + (this.props.workersLimit == 20 ? " active" : "")}
-                            onClick={ (e) => { this.props.actionQueue.put(new ChangeWorkersLimitAction(20)) } }
-                        >20</a>
                         <a
                             className={"workers_stats__pagination_per_page_switch" + (this.props.workersLimit == 50 ? " active" : "")}
                             onClick={ (e) => { this.props.actionQueue.put(new ChangeWorkersLimitAction(50)) } }

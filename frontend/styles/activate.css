@@ -1,0 +1,9 @@
+.activate__in_success, .activate__initial {
+    font-size: 18px;
+    color: #646e70;
+}
+
+.activate__in_error {
+    font-size: 18px;
+    color: #ff3300;
+}

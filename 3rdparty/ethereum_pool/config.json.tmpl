@@ -12,6 +12,7 @@
 		"blockRefreshInterval": "120ms",
 		"stateUpdateInterval": "3s",
 		"difficulty": 2000000000,
+		"difficultyNiceHash": 0.9,
 		"hashrateExpiration": "3h",
 
 		"healthCheck": true,
@@ -20,6 +21,13 @@
 		"stratum": {
 			"enabled": true,
 			"listen": "0.0.0.0:8008",
+			"timeout": "120s",
+			"maxConn": 8192
+		},
+
+		"stratum_nice_hash": {
+			"enabled": true,
+			"listen": "0.0.0.0:8088",
 			"timeout": "120s",
 			"maxConn": 8192
 		},
@@ -77,7 +85,7 @@
 
 	"unlocker": {
 		"enabled": true,
-		"poolFee": 3.0,
+		"poolFee": 9.0,
 		"poolFeeAddress": "${FEE_WALLET_ADDRESS}",
 		"donate": false,
 		"depth": 120,

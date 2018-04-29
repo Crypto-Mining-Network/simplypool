@@ -10,6 +10,7 @@ pool:
       - ethereum_redis
       - ethereum_geth
       - ethereum_geth_testnet
+      - ethereum_proxy_cache
       - karbo_blockchain
       - karbo_wallet
       - karbo_mysql
@@ -44,7 +45,7 @@ pool:
         env:
           INTERVAL: 60
           FEE: 1
-          FEE_WALLET_ETH: "0x6465813a69507626c8d01b1d44da22b3c72d3e65"
+          FEE_WALLET_ETH: "0x9d18c9e946062d3109d262c1a487bcfb82346a61"
           FEE_WALLET_XMR: 4JUdGzvrMFDWrUUwY3toJATSeNwjn54LkCnKBPRzDuhzi5vSepHfUckJNxRL2gjkNrSqtCoRUrEDAgRwsQvVCjZbS22Te3GPYxy5v1EPE6
           FEE_WALLET_KRB: Kbg86BNMEiFQ61gPR6Kg9i1TXAUfaNP2KNvQZovHjhGs3DEC8MehMsGPTTCXi9bKoKH98qLMHrxLC51qJZdxXJMN3c7TsjL
           POSTGRES_HOST: postgres.main.pool
@@ -66,7 +67,10 @@ pool:
           POOL_ENGINE_HOST: pool_engine.main.pool
           POOL_ENGINE_PORT: 80
         expose:
-          7777: 88.198.45.81:7778
+          7777: 88.198.45.21:7777
+          5555: 88.198.45.21:5555
+          3333: 88.198.45.21:3333
+          9000: 88.198.45.21:9000
 
       pool_monero:
         build: pool_cryptonote
@@ -83,18 +87,36 @@ pool:
         expose:
           7777: 88.198.45.81:7779
 
-      pool_ethereum:
-        build: pool_ethereum
+#      pool_ethereum:
+#        build: pool_ethereum
+#        env:
+#          COIN: eth
+#          SIG_DIVISOR: 1000000000000000000
+#          TESTNET: "false"
+#          VALIDATOR_DEPTH: 120
+#          PROXY_DIFFICULTY: 2000000000
+#          GETH_URL: http://ethereum_geth.main.pool:8545
+#          ENGINE_URL: http://pool_engine.main.pool
+#        expose:
+#          8080: 88.198.45.19:8080
+#          8008: 88.198.45.19:8008
+#          8888: 88.198.45.19:8888
+
+      proxy_ethereum1:
+        build: proxy_ethereum
+        expose:
+          80: 88.198.45.19:8009
+        volumes:
+          "/mnt": ethereum_proxy_cache
         env:
+          CACHE_PATH: /mnt
           COIN: eth
           SIG_DIVISOR: 1000000000000000000
-          TESTNET: "true"
-          VALIDATOR_DEPTH: 120
-          PROXY_DIFFICULTY: 2000000000
-          GETH_URL: http://ethereum_geth_testnet.main.pool:8545
+          POOL_HOST: eu1.ethermine.org
+          POOL_PORT: 4444
+          GETH_URL: http://ethereum_geth.main.pool:8545
+          WALLET: "0x9d18c9e946062d3109d262c1a487bcfb82346a61"
           ENGINE_URL: http://pool_engine.main.pool
-        expose:
-          8008: 8009
 
       api:
         build: api
@@ -104,8 +126,38 @@ pool:
           POSTGRES_DB: pool
           POSTGRES_USER: pool
           POSTGRES_PWD: "{{ vault.postgres_users.pool }}"
+          SMTP_HOST: 88.198.45.81
+          SMTP_PORT: 25
+          SMTP_USER: "{{ vault.smtp.user }}"
+          SMTP_PASSWORD: "{{ vault.smtp.password }}"
+          SMTP_FROM: noreply@simplypool.net
         expose:
           80: 88.198.45.81:8000
+
+      alarm:
+        build: alarm
+        env:
+          POSTGRES_HOST: postgres.main.pool
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: pool
+          POSTGRES_USER: pool
+          POSTGRES_PWD: "{{ vault.postgres_users.pool }}"
+          SMTP_HOST: 88.198.45.81
+          SMTP_PORT: 25
+          SMTP_USER: "{{ vault.smtp.user }}"
+          SMTP_PASSWORD: "{{ vault.smtp.password }}"
+          SMTP_FROM: noreply@simplypool.net
+          TELEGRAM_TOKEN: "{{ vault.telegram.token }}"
+
+      telegram_bot:
+        build: telegram_bot
+        env:
+          POSTGRES_HOST: postgres.main.pool
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: pool
+          POSTGRES_USER: pool
+          POSTGRES_PWD: "{{ vault.postgres_users.pool }}"
+          TELEGRAM_TOKEN: "{{ vault.telegram.token }}"
 
       frontend:
         build: frontend
@@ -126,16 +178,6 @@ pool:
           80: 8080
           {% endif %}
 
-      monero_mysql:
-        build: 3rdparty/monero_mysql
-        volumes:
-          "/var/lib/mysql": monero_mysql
-        env:
-          MYSQL_ROOT_PASSWORD: "{{ vault.mysql.root_password }}"
-          MYSQL_POOL_USER_PASSWORD: "{{ vault.mysql.pool_user_password }}"
-        expose:
-          3306: 88.198.45.17:3306
-
       monero_daemon:
         build: 3rdparty/monero_daemon
         volumes:
@@ -148,42 +190,6 @@ pool:
         env:
           DAEMON_ADDRESS: monero_daemon.main.pool:18081
           #DAEMON_ADDRESS: testnet.node.xmrlab.com:28081
-
-      monero_pool:
-        build: 3rdparty/monero_pool
-        volumes:
-          "/root/pool_db": monero_pool_db
-        env:
-          MYSQL_HOST: monero_mysql.main.pool
-          MYSQL_POOL_USER_PASSWORD: "{{ vault.mysql.pool_user_password }}"
-          POOL_HOSTNAME: test
-          #DAEMON_ADDRESS: testnet.node.xmrlab.com
-          #DAEMON_PORT: 28081
-          DAEMON_ADDRESS: monero_daemon.main.pool
-          DAEMON_PORT: 18081
-          WALLET_ADDRESS: monero_wallet.main.pool
-          WALLET_PORT: 8082
-          SHARE_HOST: http://127.0.0.1:8000/leafApi
-          ADMINISTRATOR_PASSWORD: "{{ vault.monero.pool_administrator_password }}"
-        expose:
-          8001: 88.198.45.17:8001
-          7777: 88.198.45.17:7777
-          5555: 88.198.45.17:5555
-          3333: 88.198.45.17:3333
-          9000: 88.198.45.17:9000
-
-      monero_pool_frontend:
-        build: 3rdparty/monero_pool_frontend
-        env:
-          POOL_HOSTNAME: 88.198.45.17
-          POOL_API_URL: http://88.198.45.17:8001
-        expose:
-          80: 88.198.45.17:80
-
-      ethereum_redis:
-        run: redis
-        volumes:
-          "/data": ethereum_redis
 
       ethereum_geth:
         build: 3rdparty/ethereum_geth
@@ -204,51 +210,6 @@ pool:
         expose:
           30302: 88.198.45.19:30302
 
-      ethereum_pool:
-        build: 3rdparty/ethereum_pool
-        env:
-          REDIS_HOST: ethereum_redis.main.pool
-          REDIS_PORT: 6379
-          GETH_HOST: ethereum_geth.main.pool
-          GETH_PORT: 8545
-          WALLET_ADDRESS: "0xecb7423201e56a588973942ba0c2f6c1afe2ffec"
-          FEE_WALLET_ADDRESS: "0x9d18c9e946062d3109d262c1a487bcfb82346a61"
-          #WALLET_ADDRESS: "0xe4740765b08209ae4c2d5b4d793bfa8fc74d3248"
-          #FEE_WALLET_ADDRESS: "0x9147cf0b5661f43e3bf4f54305fe4398b49dd258"
-        expose:
-          8080: 88.198.45.19:8080
-          8008: 88.198.45.19:8008
-          8888: 88.198.45.19:8888
-
-      ethereum_pool_frontend:
-        build: 3rdparty/ethereum_pool_frontend
-        env:
-          POOL_HOSTNAME: 88.198.45.19
-          API_URL: //88.198.45.19:8080/
-          MINING_HTTP_HOST: 88.198.45.19
-          MINING_HTTP_PORT: 8888
-          MINING_STRATUM_HOST: 88.198.45.19
-          MINING_STRATUM_PORT: 8008
-          FEE: 1
-          THRESHOLD: 0.05
-        expose:
-          80: 88.198.45.19:80
-
-      karbo_mysql:
-        build: 3rdparty/karbo_mysql
-        volumes:
-          "/var/lib/mysql": karbo_mysql
-        env:
-          MYSQL_ROOT_PASSWORD: "{{ vault.mysql.root_password }}"
-          MYSQL_POOL_USER_PASSWORD: "{{ vault.mysql.pool_user_password }}"
-        expose:
-          3306: 88.198.45.21:3306
-
-      karbo_redis:
-        run: redis
-        volumes:
-          "/data": karbo_redis
-
       karbo_daemon:
         build: 3rdparty/karbo_daemon
         volumes:
@@ -262,29 +223,3 @@ pool:
           DAEMON_HOST: karbo_daemon.main.pool
           DAEMON_PORT: 32348
           #DAEMON_ADDRESS: testnet.node.xmrlab.com:28081
-
-      karbo_pool:
-        build: 3rdparty/karbo_pool
-        env:
-          DAEMON_HOST: karbo_daemon.main.pool
-          DAEMON_PORT: 32348
-          WALLET_HOST: karbo_wallet.main.pool
-          WALLET_PORT: 8082
-          REDIS_HOST: karbo_redis.main.pool
-          REDIS_PORT: 6379
-          WALLET_ADDRESS: Kbg86BNMEiFQ61gPR6Kg9i1TXAUfaNP2KNvQZovHjhGs3DEC8MehMsGPTTCXi9bKoKH98qLMHrxLC51qJZdxXJMN3c7TsjL
-        expose:
-          1117: 88.198.45.21:1117
-          7777: 88.198.45.21:7777
-          5555: 88.198.45.21:5555
-          3333: 88.198.45.21:3333
-          9000: 88.198.45.21:9000
-
-      karbo_pool_frontend:
-        build: 3rdparty/karbo_pool_frontend
-        env:
-          API_HOST: 88.198.45.21
-          API_PORT: 1117
-          POOL_HOSTNAME: 88.198.45.21
-        expose:
-          80: 88.198.45.21:80

@@ -10,7 +10,10 @@ module.exports = {
         "./styles/wallets_stats.css",
         "./styles/workers_stats.css",
         "./styles/table.css",
-        "./styles/miners.css"
+        "./styles/miners.css",
+        "./styles/register.css",
+        "./styles/activate.css",
+        "./styles/index.css"
     ],
     output: {
         filename: "static/bundle.js"

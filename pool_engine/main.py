@@ -83,6 +83,30 @@ async def update_hash_history(conn, granularity, coin, wallet, worker, hashes):
                  at = %s AND 
                  granularity = %s AND 
                  coin = %s AND 
+                 wallet IS NULL AND
+                 worker IS NULL""",
+            (hashes, at, granularity, coin)
+        )
+        await conn.execute(
+            """INSERT INTO workers_history (at, granularity, coin, wallet, valid_hashes, invalid_hashes)
+               SELECT %s, %s, %s, %s, %s, %s
+               WHERE NOT EXISTS (SELECT 1 FROM workers_history WHERE 
+               at = %s AND 
+               granularity = %s AND 
+               coin = %s AND 
+               wallet IS NULL AND
+               worker IS NULL
+               )
+            """,
+            (at, granularity, coin, None, hashes, 0, at, granularity, coin)
+        )
+        await conn.execute(
+            """UPDATE workers_history 
+               SET valid_hashes = valid_hashes + %s 
+               WHERE 
+                 at = %s AND 
+                 granularity = %s AND 
+                 coin = %s AND 
                  wallet = %s AND
                  worker IS NULL""",
             (hashes, at, granularity, coin, wallet)
@@ -126,7 +150,7 @@ async def update_hash_history(conn, granularity, coin, wallet, worker, hashes):
         )
 
 
-async def update_worker(conn, coin, wallet, worker, hashes):
+async def update_worker(conn, coin, wallet, worker, email, hashes):
     now = datetime.utcnow()
     async with conn.begin() as tr:
         await conn.execute(
@@ -135,23 +159,29 @@ async def update_worker(conn, coin, wallet, worker, hashes):
                 last_share = %s, 
                 downtime = downtime + (CASE WHEN extract(epoch from (%s - last_share)) > 900 THEN extract(epoch from (%s - last_share)) ELSE 0 END),
                 uptime = (CASE WHEN extract(epoch from (%s - last_share)) < 900 THEN uptime + extract(epoch from (%s - last_share)) ELSE 0 END),
-                valid_hashes = valid_hashes + %s
+                valid_hashes = valid_hashes + %s,
+                first_session_share_at = (CASE WHEN extract(epoch from (%s - last_share)) < 900 AND first_session_share_at IS NOT NULL THEN first_session_share_at ELSE %s END)
               WHERE
                 coin = %s AND
                 wallet = %s AND 
                 worker IS NULL""",
-            (now, now, now, now, now, hashes, coin, wallet)
+            (now, now, now, now, now, hashes, now, now, coin, wallet)
         )
+        if email.strip():
+            await conn.execute(
+                """UPDATE workers SET email = %s WHERE coin = %s AND wallet = %s AND worker IS NULL""",
+                (email, coin, wallet)
+            )
         await conn.execute(
-            """INSERT INTO workers (coin, wallet, last_share, first_share, downtime, uptime, valid_hashes, invalid_hashes)
-               SELECT %s, %s, %s, %s, %s, %s, %s, %s
+            """INSERT INTO workers (coin, wallet, last_share, first_share, first_session_share_at, downtime, uptime, valid_hashes, invalid_hashes)
+               SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s
                WHERE NOT EXISTS (SELECT 1 FROM workers WHERE 
                  coin = %s AND 
                  wallet = %s AND
                  worker IS NULL
                )
             """,
-            (coin, wallet, now, now, 0, 0, hashes, 0, coin, wallet)
+            (coin, wallet, now, now, now, 0, 0, hashes, 0, coin, wallet)
         )
         await conn.execute(
             """UPDATE workers
@@ -159,23 +189,24 @@ async def update_worker(conn, coin, wallet, worker, hashes):
                  last_share = %s, 
                  downtime = downtime + (CASE WHEN extract(epoch from (%s - last_share)) > 900 THEN extract(epoch from (%s - last_share)) ELSE 0 END),
                  uptime = (CASE WHEN extract(epoch from (%s - last_share)) < 900 THEN uptime + extract(epoch from (%s - last_share)) ELSE 0 END),
-                 valid_hashes = valid_hashes + %s
+                 valid_hashes = valid_hashes + %s,
+                 first_session_share_at = (CASE WHEN extract(epoch from (%s - last_share)) < 900 AND first_session_share_at IS NOT NULL THEN first_session_share_at ELSE %s END)
                WHERE
                  coin = %s AND
                  wallet = %s AND 
                  worker = %s""",
-            (now, now, now, now, now, hashes, coin, wallet, worker)
+            (now, now, now, now, now, hashes, now, now, coin, wallet, worker)
         )
         await conn.execute(
-            """INSERT INTO workers (coin, wallet, worker, last_share, first_share, downtime, uptime, valid_hashes, invalid_hashes)
-               SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s
+            """INSERT INTO workers (coin, wallet, worker, last_share, first_share, first_session_share_at, downtime, uptime, valid_hashes, invalid_hashes)
+               SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                WHERE NOT EXISTS (SELECT 1 FROM workers WHERE 
                  coin = %s AND 
                  wallet = %s AND
                  worker = %s
                )
             """,
-            (coin, wallet, worker, now, now, 0, 0, hashes, 0, coin, wallet, worker)
+            (coin, wallet, worker, now, now, now, 0, 0, hashes, 0, coin, wallet, worker)
         )
 
 
@@ -185,6 +216,7 @@ async def submit_share(request):
     count = args["count"]
     wallet = args["wallet"]
     worker = args.get("worker", "default")
+    email = args.get("email", None)
 
     print("Share submitted: %s, %s, %s, %s" % (coin, count, wallet, worker))
 
@@ -207,7 +239,7 @@ async def submit_share(request):
         await update_hash_history(conn, "5T", coin, wallet, worker, count)
         await update_hash_history(conn, "1H", coin, wallet, worker, count)
         await update_hash_history(conn, "6H", coin, wallet, worker, count)
-        await update_worker(conn, coin, wallet, worker, count)
+        await update_worker(conn, coin, wallet, worker, email, count)
 
     return web.json_response({})
 

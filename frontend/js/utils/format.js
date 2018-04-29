@@ -64,7 +64,9 @@ export function hashrateHuman(hashes) {
         return `${hashes.toFixed(2)} H/s`;
     } else if (hashes < 1000000) {
         return `${(hashes / 1000).toFixed(2)} KH/s`;
-    } else {
+    } else if (hashes < 1000000000) {
         return `${(hashes / 1000000).toFixed(2)} MH/s`;
+    } else {
+        return `${(hashes / 1000000000).toFixed(2)} GH/s`;
     }
 }

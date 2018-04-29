@@ -66,8 +66,8 @@ def upgrade():
         sa.Column('first_share', sa.TIMESTAMP, nullable=False),
         sa.Column('downtime', sa.Integer, nullable=False),
         sa.Column('uptime', sa.Integer, nullable=False),
-        sa.Column('valid_hashes', sa.Integer, nullable=False),
-        sa.Column('invalid_hashes', sa.Integer, nullable=False)
+        sa.Column('valid_hashes', sa.BIGINT, nullable=False),
+        sa.Column('invalid_hashes', sa.BIGINT, nullable=False)
     )
     op.create_unique_constraint('uq_workers', 'workers', ['coin', 'wallet', 'worker'], )
     op.create_table(

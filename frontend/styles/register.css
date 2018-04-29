@@ -1,0 +1,49 @@
+.register__input, .register__input:focus {
+    width: 350px;
+    height: 30px;
+    border: 1px solid #d9d9d9;
+    border-radius: 3px;
+    padding: 0 5px;
+    font-size: 16px;
+    outline: 0;
+}
+
+.register__button {
+    display: inline-block;
+    height: 30px;
+    background: #2cb0d0;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    border: 0;
+    vertical-align: middle;
+    margin-top: 10px;
+}
+
+.register__label {
+    display: inline-block;
+    width: 120px;
+    padding-right: 5px;
+    color: #646e70;
+}
+
+.register__row {
+    margin-bottom: 5px;
+}
+
+.register__error {
+    display: block;
+    margin-left: 125px;
+    color: #ff3300;
+    font-size: 12px;
+}
+
+.register__in_success {
+    font-size: 18px;
+    color: #646e70;
+}
+
+.register__in_error {
+    font-size: 18px;
+    color: #ff3300;
+}
