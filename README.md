@@ -1,5 +1,5 @@
 # simplypool
-Extensible pool for mining various crypto currencies
+Extensible pool for mining various crypto currencies (python, asyncio, react.js)
 
 
 ![simplypool1](https://user-images.githubusercontent.com/1088715/100876618-4d422100-34b0-11eb-8b1a-c6396ffd794f.jpg)
